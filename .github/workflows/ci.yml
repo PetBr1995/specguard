@@ -1,0 +1,27 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  cli:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: cli } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install
+      - run: npx tsc --noEmit
+      - run: npm test
+      - name: Dogfooding — o SpecGuard verifica a própria spec
+        run: npm run -s check -- .. --ignore examples,embedder --out ../specguard-report.md
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: specguard-report, path: specguard-report.md }
+  embedder:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: embedder } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install pytest
+      - run: pytest -q

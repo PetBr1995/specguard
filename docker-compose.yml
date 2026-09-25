@@ -1,0 +1,14 @@
+# Fase 2: banco vetorial + serviço de embeddings
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: specguard
+      POSTGRES_PASSWORD: specguard
+      POSTGRES_DB: specguard
+    ports: ["5432:5432"]
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+  embedder:
+    build: ./embedder
+    ports: ["8001:8001"]
